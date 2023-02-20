@@ -1,5 +1,5 @@
 ---
-title: "PLiE Laboratori"
+title: "PLiE Laboratori (LAB 1)"
 author: "REIG OJEA PONCE"
 output:
   html_document:
@@ -214,4 +214,3 @@ $$ s.a: \left\{ \begin{aligned}
 \end{aligned} \right.$$
 
 Tenim més d'un conjunt de restriccions, ja que n'hi ha algunes que hi ha una quantitat mínima, i d'altres que no sobrepassem una quantitat màxim.
-# LAB 
