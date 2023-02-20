@@ -1,0 +1,217 @@
+---
+title: "PLiE Laboratori"
+author: "REIG OJEA PONCE"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: hide
+date: '17/feb/2023'
+---
+
+### Com fer chunks de SAS en RMarkown
+
+*Nota:* S'ha de tenir el SAS instal·lat al desktop
+
+```{r, warning=F, message=F}
+# install.packages("SASmarkdown")
+library(SASmarkdown)
+saspath <- "C:/Program Files/SASHome/x86/SASFoundation/9.4/sas.exe" #UPC
+# saspath <- "C:/Program Files/SASHome/SASFoundation/9.4/sas.exe" #UB
+sasopts <- "-nosplash -linesize 75"
+knitr::opts_chunk$set(engine="sashtml", engine.path=saspath, 
+        engine.opts=sasopts, comment=NA)
+```
+
+
+
+Chunk d'exemple:
+```{sas}
+proc means data=sashelp.class;
+run;
+```
+
+
+# LAB 1: Modelització (elements)
+
+1. Paràmetres
+
+   1.1. Conjunts
+   
+   1.2. Constants (paràmetres)
+   
+2. Variables de decisió: definir el domini
+
+3. Funció objectiu: sigui el `min cost`, `max ben`, `max felicitat`
+
+4. Restriccions: limita la regió factible
+
+5. **Model lineal**
+
+## 1. Problema de planificació de la Producció
+
+1. Paràmetres:
+
+    - P, conjunt de productes
+   
+    - M, conjunt de materials
+    
+    - $c_i$, benefici unitari del producte $i,\ \forall i \in P$
+    
+    - $a_{ij}$, quantitat de material que necessitem per a produir una unitat de producte $i,\ \forall i \in P \\ \quad \forall j \in M$
+    
+    - $b_j$, quantitat disponible de material $j,\ j \in M$
+
+2. Variables de decisió:
+
+    - $x_i$, quantitat a produir de producte $i, i \in P$ ($x_i \geq 0, \forall i \in P$)
+    
+3. Funció objectiu: maximitzar el benefici
+
+4. Restriccions:  la quantitat de j necessari per fer el producte i ha de ser menor o igual al que disposem en stock.
+    
+5. **Model:**
+
+$$ \underset{x}{min} \underset{i \in P}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el benefici del producte i}$$
+
+$$ s.a: \left\{ \begin{aligned} 
+  \underset{i \in P}{\sum} a_{ij}x_i \leq b_j \quad, \quad \forall j \in M \\
+  x_i \geq 0, \forall i \in P
+\end{aligned} \right.$$
+
+
+
+Tenim una quantitat limitada de material, és a dir una restricció per cada material.
+
+
+
+## 2. Problema de dieta
+
+Un exemple d'enunciat podria ser: tenim un menjador d'escola, i volem que els nens obtinguin un mínim de nutrients, que venen donats per diferents aliments.
+
+1. Paràmetres:
+
+    - A, conjunt d'aliments
+   
+    - N, conjunt de nutrients
+    
+    - $c_i$, cost unitari de l'aliment $i,\ i \in A$
+    
+    - $b_j$, quantitat mínima de nutrient j en la dieta $j \in N$
+    
+    - $a_{ij}$, quantitat de nutrient j present en una unitat d'aliment $i,\ \forall i \in A \\ \quad \forall j \in N$
+    
+
+
+2. Variables de decisió:
+
+    - $x_i$, quantitat a produir de producte i, $i \in A$ ($x_i \geq 0, \forall i \in A$)
+    
+
+3. Funció objectiu: minimitzar el cost
+
+4. Restriccions: quantitat mínima ingerida de cada nutrient (1 restricció per a cada nutrient)
+
+5. **Model:**
+
+$$ \underset{x}{max} \underset{i \in A}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el cost alimentari, i el sumatori el cost total}$$
+
+$$ s.a: \left\{ \begin{aligned} 
+ \underset{i \in A}{\sum} a_{ij}x_i \geq b_j \quad, \quad \forall j \in N  \\
+  x_i \geq 0, \forall i \in P
+\end{aligned} \right.$$
+
+
+## 3. Problema de mescla
+
+1. Paràmetres:
+
+    - D, conjunt de dissolvents
+   
+    - A, conjunt de components de quantitat mínima (*bones*)
+    
+    - B, conjunt de components de quantitat màxima (*dolentes*)
+    
+    - C, A $\cup$ B, conjunt total de components
+    
+    - $c_i$, cost unitari de dissolvent $i,\ i \in D$
+    
+    - $b_j$, quantitat mínima o màxima de component j en la mescla $\ j \in C$
+    
+    - $a_{ij}$, quantitat de component j en una unitat de dissolvent $i,\ \forall i \in D \\ \quad \forall j \in C$
+    
+   
+
+2. Variables de decisió:
+
+    - $x_i$, **proporció** de dissolvent i en la mescla, $i \in D$ ($x_i \geq 0, x_i \leq 1$)
+    
+3. Funció objectiu: minimitzar el cost unitari (habitualment en cost/litre) de la mescla
+
+4. Restriccions:
+
+    - Assegurar una quantita mínima de components *bons* (1)
+    
+    - No sobrepassar una quantita màxima de components *negatius* (2)
+    
+5. **Model:**
+
+$$ \underset{x}{min} \underset{i \in D}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el cost de dissolvent i, i el sumatori és el cost total }$$
+
+$$ s.a: \left\{ \begin{aligned} 
+  \underset{i \in D}{\sum} a_{ij}x_i \geq b_j \quad, \quad \forall j \in A \quad \text{(1)} \\
+  \underset{i \in D}{\sum} a_{ij}x_i \leq b_j \quad, \quad \forall j \in B  \quad \text{(2)}\\
+  \underset{i \in D}{\sum} x_i=1 \\
+  x_i \geq 0 \quad , \quad  x_i \leq 1 \quad , \quad \forall i \in D
+\end{aligned} \right.$$
+
+Tenim més d'un conjunt de restriccions, ja que n'hi ha algunes que hi ha una quantitat mínima, i d'altres que no sobrepassem una quantitat màxim.
+
+*Nota sobre les restriccions: la restricció de menor o igual a 1, és redundant ja que amb el major o igual a 0 i el sumatori de totes = 1, se sobreeentén que no pot haver ninguna per sobre de 1. (la podem anotar o no)*
+
+## 4. Problema del transport
+
+**Exemple:** Tenim un conjunt de refineries i diferents mercats on podem vendre el nostre producte. Volem enviar a vendre perquè el transport surti més barat. Cada mercat té una demanda que volem assolir, i cada refineria té una capacitat màxima de producció.
+
+1. Paràmetres:
+
+    - R, conjunt de refineries
+   
+    - M, conjunt de mercats
+    
+    - $p_i$, producció màxima a la refineria $i,\ i \in R$
+    
+    - $d_j$, demanda al mercat $\ j \in M$
+    
+    - Suposem que tenim més oferta que demanda. Si no: infactible: $\underset{i \in R}{\sum} p_i \geq \underset{j \in M}{\sum} d_j$
+    
+    - $c_{ij}$, cost del transport per unitat de producte de la refineria i al mercat j $i,\ \forall i \in R \\ \quad \forall j \in M$
+    
+   
+
+2. Variables de decisió:
+
+    - $x_{ij}$, quantitat de producte transportrada de la refineria i al mercat j
+    
+3. Funció objectiu: minimitzar el cost unitari (habitualment en cost/litre) de la mescla
+
+4. Restriccions:
+
+    - El sumatori de tot el que enviem des d'una refineria a tots els mercats, ha de ser menor a la producció que pot fer la refineria (1)
+    
+    - El producte que li arriba al mercat, procedent de totes les refineries, ha de ser major a la demanda (2)
+    
+5. **Model:**
+
+$$ \underset{x}{min} \underset{i \in R}{\sum}\underset{j \in M}{\sum} c_{ij}x_{ij} \qquad \text{on}\ c_{ij}x_{ij}\ \text{és el cost t. de}\ R_i \text{al} M_j \text{, i el sumatori és el cost total }$$
+
+$$ s.a: \left\{ \begin{aligned} 
+  \underset{j \in M}{\sum} x_{ij} \leq p_i \quad, \quad \forall i \in R \quad \text{(1)} \\
+  \underset{i \in R}{\sum} x_{ij} \geq d_j \quad, \quad \forall j \in M \quad \text{(2)} \\
+  x_{ij} \geq 0 \quad , \quad \forall i \in R \quad , \quad \forall j \in M
+\end{aligned} \right.$$
+
+Tenim més d'un conjunt de restriccions, ja que n'hi ha algunes que hi ha una quantitat mínima, i d'altres que no sobrepassem una quantitat màxim.
+# LAB 
