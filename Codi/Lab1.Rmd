@@ -116,7 +116,7 @@ Un exemple d'enunciat podria ser: tenim un menjador d'escola, i volem que els ne
 
 5. **Model:**
 
-$$ \underset{x}{max} \underset{i \in A}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el cost alimentari, i el sumatori el cost total}$$
+$$ \underset{x}{min} \underset{i \in A}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el cost alimentari, i el sumatori el cost total}$$
 
 $$ s.a: \left\{ \begin{aligned} 
  \underset{i \in A}{\sum} a_{ij}x_i \geq b_j \quad, \quad \forall j \in N  \\
