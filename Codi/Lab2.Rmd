@@ -1,0 +1,300 @@
+---
+title: "PLiE Laboratori (LAB 2)"
+author: "REIG OJEA PONCE"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: hide
+date: '24/feb/2023'
+---
+
+```{r, warning=F, message=F}
+# install.packages("SASmarkdown")
+library(SASmarkdown)
+ saspath <- "C:/Program Files/SASHome/x86/SASFoundation/9.4/sas.exe" #UPC
+# saspath <- "C:/Program Files/SASHome/SASFoundation/9.4/sas.exe" #UB
+sasopts <- "-nosplash -linesize 75"
+knitr::opts_chunk$set(engine="sashtml", engine.path=saspath, 
+        engine.opts=sasopts, comment=NA)
+```
+
+
+## Exercici 1: Planificació de la producció
+
+Considereu el següent problema de planificació de la producció:
+
+&nbsp;
+
+$$ \begin{smallmatrix}
+ & \text{Consum unitari mà obra (h)} & \text{ Consum unitari fusta (kg)} & \text{ Consum unitari plastic (kg)} & \text{ Benefici unitari fusta (€)}\\
+\text{Producte A} & 1 & 3 & 2 & 300\\
+\text{Producte B} & 2 & 2 & - & 250\\
+\text{Disponibilitat} & \text{150h/dia} & \text{300h/dia} & \text{100h/dia}
+\end{smallmatrix}$$
+
+&nbsp;
+
+**a) Formuleu la modelització matemàtica parametritzada**
+
+1. Paràmetres:
+
+    - P, conjunt de productes: A i B
+   
+    - M, conjunt de materials: mà d'obra, fusta i plàstic
+    
+    - $c_i$, benefici unitari del producte $i,\ \forall i \in P$ *(columna benefici)*
+    
+    - $a_{ij}$, quantitat de material que necessitem per a produir una unitat de producte $i,\ \forall i \in P \\ \quad \forall j \in M$        *(matriu de dades)*
+    
+    - $b_j$, quantitat disponible de material $j,\ j \in M$ *(vector disponibilitat)*
+
+2. Variables de decisió:
+
+    - $x_i$, quantitat a produir de producte $i, i \in P$ ($x_i \geq 0, \forall i \in P$) *(la incògnita)*
+    
+3. Funció objectiu: maximitzar el benefici
+
+4. Restriccions:  la quantitat de j necessari per fer el producte i ha de ser menor o igual al que disposem en stock.
+    
+5. **Model:**
+
+$$ \underset{x}{max} \underset{i \in P}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el benefici del producte i}$$
+
+$$ s.a: \left\{ \begin{aligned} 
+  \underset{i \in P}{\sum} a_{ij}x_i \leq b_j \quad, \quad \forall j \in M \\
+  x_i \geq 0, \forall i \in P
+\end{aligned} \right.$$
+
+
+**b) Implementeu i resoleu amb OPTMODEL**
+
+```{sas}
+proc optmodel;
+
+*Paràmetres;
+set<string> P={'A','B'};
+set<string> R={'ma','fusta','plastic'};
+number c{P} = [300 200];
+number b{R} = [150 300 100];
+number a{P,R} = [1 3 2
+                 2 2 0];
+
+*Variables de decisió;
+var x{P}>=0;
+
+*Funció objectiu;
+max ben_total=sum{i in P} c[i]*x[i];
+
+*Restriccions;
+con limit_recurs{j in R}:
+  sum{i in P} a[i,j]*x[i]<=b[j];
+
+*Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
+expand;
+
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+
+*Per obtenir la solució de les x;
+print x.sol;
+
+*Per obtenir el valor òptim;
+print ben_total;
+```
+
+S'obté el màxim benefici utilitzant 50kg del producte A i 50kg del producte B. Aquest benefici és de 25000€.
+
+## Exercici 2: Problema de la dieta
+
+Considereu el següent problema de la dieta:
+
+&nbsp;
+
+$$ \begin{smallmatrix}
+ & \text{Vitamines (ui)} & \text{ Hidrats de Carboni (ui)} & \text{ Oligoelements (ui)} & \text{ Proteines (ui)} & \text{ Preu (€/kg)}\\
+\text{Carn} & 25 & 20 & 10 & 150 & 8\\
+\text{Peix} & 200 & 50 & 10 & 200 & 10\\
+\text{Cereals} & 300 & 300 & 10 & 50 & 2\\
+\text{Fruita} & - & 160 & 50 & 20 & 1.5\\
+\text{Pa} & - & 120 & 100 & 20 & 0.5\\
+\text{Mínim diari} & \text{60ui/dia} & \text{40ui/dia} & \text{100ui/dia} & \text{100ui/dia}
+\end{smallmatrix}$$
+
+&nbsp;
+
+**a) Formuleu la modelització matemàtica parametritzada**
+
+1. Paràmetres:
+
+    - A, conjunt d'aliments: carn, peix, carn, cereals, fruita i pa
+   
+    - N, conjunt de nutrients: v, hc, o, i p
+    
+    - $c_i$, cost unitari de l'aliment $i,\ i \in A$ *(columna preu)*
+    
+    - $b_j$, quantitat mínima de nutrient j en la dieta $j \in N$ *(vector del mínim diari)*
+    
+    - $a_{ij}$, quantitat de nutrient j present en una unitat d'aliment $i,\ \forall i \in A \\ \quad \forall j \in N$         *(matriu de dades)*
+    
+
+
+2. Variables de decisió:
+
+    - $x_i$, quantitat a produir de producte i, $i \in A$ ($x_i \geq 0, \forall i \in A$) *(la incògnita)*
+    
+3. Funció objectiu: minimitzar el cost
+
+4. Restriccions: quantitat mínima ingerida de cada nutrient (1 restricció per a cada nutrient)
+
+5. **Model:**
+
+$$ \underset{x}{min} \underset{i \in A}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el cost alimentari, i el sumatori el cost total}$$
+
+$$ s.a: \left\{ \begin{aligned} 
+ \underset{i \in A}{\sum} a_{ij}x_i \geq b_j \quad, \quad \forall j \in N  \\
+  x_i \geq 0, \forall i \in P
+\end{aligned} \right.$$
+
+
+*Nota*: el `presolver=0`, dóna un valor inicial per començar a iterar. En aquest cas no hi ha diferència.
+
+```{sas}
+proc optmodel presolver=0;
+
+*Paràmetres;
+set<string> ALIMENTS={'carn','peix','cereals','fruita','pa'};
+set<string> NUTRIENTS={'v','hc','o','p'};
+number cost{ALIMENTS} = [8 10 2 15 0.5];
+number q_min{NUTRIENTS} = [60 40 100 100];
+number q_nutr{ALIMENTS,NUTRIENTS} = [25 20 10 150
+                                     200 50 10 200
+                                     300 300 10 50
+                                     0 160 50 20
+                                     0 120 100 20];
+
+*Variables de decisió;
+var x{ALIMENTS}>=0;
+
+*Funció objectiu;
+min cost_total=sum{i in ALIMENTS} cost[i]*x[i];
+
+*Restriccions;
+con min_quant{j in NUTRIENTS}:
+  sum{i in ALIMENTS} q_nutr[i,j]*x[i]>=q_min[j];
+
+*Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
+expand;
+
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+
+*Per obtenir la solució de les x;
+print x.sol;
+
+*Per obtenir el valor òptim;
+print cost_total;
+```
+
+Per a obtenir els nutrients necessàris amb el mínim cost possible, s'han de consumir 0.5kg de cereals i 4.5kg de pa. Aquesta dieta ens costaria 2.65€.
+
+## Exercici 3: Problema de mescla
+
+Considereu el següent problema de mescla:
+
+&nbsp;
+
+$$ \begin{smallmatrix}
+ & \text{Disolvent 1} & \text{Disolvent 2} & \text{Disolvent 3} & \text{Disolvent 4} & \text{  Contingut mescla (ml/l)}\\
+\text{Clor (ml/l)} & 180 & 120 & 90 & 60 & \geq 90\\
+\text{Amoníac (ml/l)} & 3 & 2 & 6 & 5 & \leq 4\\
+\text{Cost (€/l)} & 16 & 12 & 10 & 11
+\end{smallmatrix}$$
+
+&nbsp;
+
+**a) Formuleu la modelització matemàtica parametritzada**
+
+1. Paràmetres:
+
+    - D, conjunt de dissolvents: 1,2,3,4
+   
+    - A, conjunt de components de quantitat mínima: cl
+    
+    - B, conjunt de components de quantitat màxima: am
+    
+    - C, A $\cup$ B, conjunt total de components: cl, am
+    
+    - $c_i$, cost unitari de dissolvent $i,\ i \in D$ *(vector cost)*
+    
+    - $b_j$, quantitat mínima o màxima de component j en la mescla $\ j \in C$ *(columna contingut)*
+    
+    - $a_{ij}$, quantitat de component j en una unitat de dissolvent $i,\ \forall i \in D \\ \quad \forall j \in C$        *(matriu de dades)*
+    
+   
+
+2. Variables de decisió:
+
+    - $x_i$, **proporció** de dissolvent i en la mescla, $i \in D$ ($x_i \geq 0, x_i \leq 1$)
+    
+3. Funció objectiu: minimitzar el cost unitari (habitualment en cost/litre) de la mescla
+
+4. Restriccions:
+
+    - Assegurar una quantita mínima de components *bons* (1)
+    
+    - No sobrepassar una quantita màxima de components *negatius* (2)
+    
+5. **Model:**
+
+$$ \underset{x}{min} \underset{i \in D}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el cost de dissolvent i, i el sumatori és el cost total }$$
+
+$$ s.a: \left\{ \begin{aligned} 
+  \underset{i \in D}{\sum} a_{ij}x_i \geq b_j \quad, \quad \forall j \in A \quad \text{(1)} \\
+  \underset{i \in D}{\sum} a_{ij}x_i \leq b_j \quad, \quad \forall j \in B  \quad \text{(2)}\\
+  \underset{i \in D}{\sum} x_i=1 \\
+  x_i \geq 0 \quad , \quad  x_i \leq 1 \quad , \quad \forall i \in D
+\end{aligned} \right.$$
+
+
+**Falta revisar codi**
+```{sas}
+proc optmodel presolver=0;
+
+*Paràmetres;
+set<string> disolvents={'1','2','3','4'};
+set<string> components={'cl','am'};
+set<string> comp_min={'cl'};
+set<string> comp_max={'am'};
+number cost{disolvents} = [16 12 10 11];
+number quant{components} = [90 4];
+number q_comp{disolvents,components} = [180 3 120 2 90 6 60 5];
+
+*Variables de decisió;
+var x{disolvents}>=0;
+
+*Funció objectiu;
+min cost_total=sum{i in disolvents} cost[i]*x[i];
+
+*Restriccions;
+con min_quant{j in comp_min}:
+  sum{i in disolvents} q_comp[i,j]*x[i]>=quant[j];
+con max_quant{j in comp_max}:
+  sum{i in disolvents} q_comp[i,j]*x[i]<=quant[j];
+con sum{i in disolvents} x[i]=1;
+
+*Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
+expand;
+
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+
+*Per obtenir la solució de les x;
+print x.sol;
+
+*Per obtenir el valor òptim;
+print cost_total;
+```
+Exercici 5
