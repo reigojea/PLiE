@@ -74,7 +74,7 @@ run;
     
 5. **Model:**
 
-$$ \underset{x}{min} \underset{i \in P}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el benefici del producte i}$$
+$$ \underset{x}{max} \underset{i \in P}{\sum} c_ix_i \qquad \text{on}\ c_ix_i\ \text{és el benefici del producte i}$$
 
 $$ s.a: \left\{ \begin{aligned} 
   \underset{i \in P}{\sum} a_{ij}x_i \leq b_j \quad, \quad \forall j \in M \\
