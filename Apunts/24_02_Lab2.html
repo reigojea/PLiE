@@ -12,7 +12,7 @@
 <meta name="author" content="REIG OJEA PONCE" />
 
 
-<title>PLiE Laboratori (LAB 1)</title>
+<title>PLiE Laboratori (LAB 2)</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1677,67 +1677,56 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">PLiE Laboratori (LAB 1)</h1>
+<h1 class="title toc-ignore">PLiE Laboratori (LAB 2)</h1>
 <h4 class="author">REIG OJEA PONCE</h4>
-<h4 class="date">17/feb/2023</h4>
+<h4 class="date">24/feb/2023</h4>
 
 </div>
 
 
-<div id="com-fer-chunks-de-sas-en-rmarkown" class="section level3">
-<h3>Com fer chunks de SAS en RMarkown</h3>
-<p><em>Nota:</em> S’ha de tenir el SAS instal·lat al desktop</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(&quot;SASmarkdown&quot;)</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SASmarkdown)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>saspath <span class="ot">&lt;-</span> <span class="st">&quot;C:/Program Files/SASHome/x86/SASFoundation/9.4/sas.exe&quot;</span> <span class="co">#UPC</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a> saspath <span class="ot">&lt;-</span> <span class="st">&quot;C:/Program Files/SASHome/x86/SASFoundation/9.4/sas.exe&quot;</span> <span class="co">#UPC</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># saspath &lt;- &quot;C:/Program Files/SASHome/SASFoundation/9.4/sas.exe&quot; #UB</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>sasopts <span class="ot">&lt;-</span> <span class="st">&quot;-nosplash -linesize 75&quot;</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">engine=</span><span class="st">&quot;sashtml&quot;</span>, <span class="at">engine.path=</span>saspath, </span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">engine.opts=</span>sasopts, <span class="at">comment=</span><span class="cn">NA</span>)</span></code></pre></div>
-<p>Chunk d’exemple:</p>
-<pre class="sas"><code>proc means data=sashelp.class;
-run;</code></pre>
-<pre><code>                            Procedimiento MEANS
-
- Variable    N          Media        Dev std         Mínimo         Máximo
- -------------------------------------------------------------------------
- Age        19     13.3157895      1.4926722     11.0000000     16.0000000
- Height     19     62.3368421      5.1270752     51.3000000     72.0000000
- Weight     19    100.0263158     22.7739335     50.5000000    150.0000000
- -------------------------------------------------------------------------</code></pre>
-</div>
-<div id="lab-1-modelització-elements" class="section level1">
-<h1>LAB 1: Modelització (elements)</h1>
-<ol style="list-style-type: decimal">
-<li><p>Paràmetres</p>
-<p>1.1. Conjunts</p>
-<p>1.2. Constants (paràmetres)</p></li>
-<li><p>Variables de decisió: definir el domini</p></li>
-<li><p>Funció objectiu: sigui el <code>min cost</code>,
-<code>max ben</code>, <code>max felicitat</code></p></li>
-<li><p>Restriccions: limita la regió factible</p></li>
-<li><p><strong>Model lineal</strong></p></li>
-</ol>
-<div id="problema-de-planificació-de-la-producció" class="section level2">
-<h2>1. Problema de planificació de la Producció</h2>
+<div id="exercici-1-planificació-de-la-producció" class="section level2">
+<h2>Exercici 1: Planificació de la producció</h2>
+<p>Considereu el següent problema de planificació de la producció:</p>
+<p> </p>
+<p><span class="math display">\[ \begin{smallmatrix}
+&amp; \text{Consum unitari mà obra (h)} &amp; \text{ Consum unitari
+fusta (kg)} &amp; \text{ Consum unitari plastic (kg)} &amp; \text{
+Benefici unitari fusta (€)}\\
+\text{Producte A} &amp; 1 &amp; 3 &amp; 2 &amp; 300\\
+\text{Producte B} &amp; 2 &amp; 2 &amp; - &amp; 250\\
+\text{Disponibilitat} &amp; \text{150h/dia} &amp; \text{300h/dia} &amp;
+\text{100h/dia}
+\end{smallmatrix}\]</span></p>
+<p> </p>
+<p><strong>a) Formuleu la modelització matemàtica
+parametritzada</strong></p>
 <ol style="list-style-type: decimal">
 <li><p>Paràmetres:</p>
 <ul>
-<li><p>P, conjunt de productes</p></li>
-<li><p>M, conjunt de materials</p></li>
+<li><p>P, conjunt de productes: A i B</p></li>
+<li><p>M, conjunt de materials: mà d’obra, fusta i plàstic</p></li>
 <li><p><span class="math inline">\(c_i\)</span>, benefici unitari del
-producte <span class="math inline">\(i,\ \forall i \in
-P\)</span></p></li>
+producte <span class="math inline">\(i,\ \forall i \in P\)</span>
+<em>(columna benefici)</em></p></li>
 <li><p><span class="math inline">\(a_{ij}\)</span>, quantitat de
 material que necessitem per a produir una unitat de producte <span class="math inline">\(i,\ \forall i \in P \\ \quad \forall j \in
-M\)</span></p></li>
+M\)</span> <em>(matriu de dades)</em></p></li>
 <li><p><span class="math inline">\(b_j\)</span>, quantitat disponible de
-material <span class="math inline">\(j,\ j \in M\)</span></p></li>
+material <span class="math inline">\(j,\ j \in M\)</span> <em>(vector
+disponibilitat)</em></p></li>
 </ul></li>
 <li><p>Variables de decisió:</p>
 <ul>
 <li><span class="math inline">\(x_i\)</span>, quantitat a produir de
-producte <span class="math inline">\(i, i \in P\)</span> (<span class="math inline">\(x_i \geq 0, \forall i \in P\)</span>)</li>
+producte <span class="math inline">\(i, i \in P\)</span> (<span class="math inline">\(x_i \geq 0, \forall i \in P\)</span>) <em>(la
+incògnita)</em></li>
 </ul></li>
 <li><p>Funció objectiu: maximitzar el benefici</p></li>
 <li><p>Restriccions: la quantitat de j necessari per fer el producte i
@@ -1752,32 +1741,146 @@ producte i}\]</span></p>
 M \\
   x_i \geq 0, \forall i \in P
 \end{aligned} \right.\]</span></p>
-<p>Tenim una quantitat limitada de material, és a dir una restricció per
-cada material.</p>
+<p><strong>b) Implementeu i resoleu amb OPTMODEL</strong></p>
+<pre class="sas"><code>proc optmodel;
+
+*Paràmetres;
+set&lt;string&gt; P={&#39;A&#39;,&#39;B&#39;};
+set&lt;string&gt; R={&#39;ma&#39;,&#39;fusta&#39;,&#39;plastic&#39;};
+number c{P} = [300 200];
+number b{R} = [150 300 100];
+number a{P,R} = [1 3 2
+                 2 2 0];
+
+*Variables de decisió;
+var x{P}&gt;=0;
+
+*Funció objectiu;
+max ben_total=sum{i in P} c[i]*x[i];
+
+*Restriccions;
+con limit_recurs{j in R}:
+  sum{i in P} a[i,j]*x[i]&lt;=b[j];
+
+*Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
+expand;
+
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+
+*Per obtenir la solució de les x;
+print x.sol;
+
+*Per obtenir el valor òptim;
+print ben_total;</code></pre>
+<pre><code>                          The OPTMODEL Procedure
+
+Var x[A] &gt;= 0
+Var x[B] &gt;= 0
+Maximize ben_total=300*x[A] + 200*x[B]
+Restricción limit_recurs[ma]: x[A] + 2*x[B] &lt;= 150
+Restricción limit_recurs[fusta]: 3*x[A] + 2*x[B] &lt;= 300
+Restricción limit_recurs[plastic]: 2*x[A] &lt;= 100
+ 
+                                                                           
+ 
+                          The OPTMODEL Procedure
+
+                           Resumen del problema
+
+                Objective Sense                Maximization
+                Objective Function                ben_total
+                Objective Type                       Lineal
+                                                           
+                Number of Variables                       2
+                Bounded Above                             0
+                Bounded Below                             2
+                Bounded Below and Above                   0
+                Free                                      0
+                Fixed                                     0
+                                                           
+                Number of Constraints                     3
+                Linear LE (&lt;=)                            3
+                Linear EQ (=)                             0
+                Linear GE (&gt;=)                            0
+                Linear Range                              0
+                                                           
+                Coeficientes de restricción               5
+
+                        Información de rendimiento
+
+                    Execution Mode       Single-Machine
+                    Number of Threads    1             
+ 
+                                                                           
+ 
+                          The OPTMODEL Procedure
+
+                          Resumen de la solución
+
+                   Solver                            LP
+                   Algorithm               Dual Simplex
+                   Objective Function         ben_total
+                   Solution Status              Optimal
+                   Objective Value                25000
+                                                       
+                   Primal Infeasibility               0
+                   Dual Infeasibility                 0
+                   Bound Infeasibility                0
+                                                       
+                   Iterations                         3
+                   Presolve Time                   0.00
+                   Solution Time                   0.00
+
+                               [1]    x.SOL
+
+                               A         50
+                               B         50
+
+                                 ben_total
+
+                                     25000</code></pre>
 </div>
-<div id="problema-de-dieta" class="section level2">
-<h2>2. Problema de dieta</h2>
-<p>Un exemple d’enunciat podria ser: tenim un menjador d’escola, i volem
-que els nens obtinguin un mínim de nutrients, que venen donats per
-diferents aliments.</p>
+<div id="exercici-2-problema-de-la-dieta" class="section level2">
+<h2>Exercici 2: Problema de la dieta</h2>
+<p>Considereu el següent problema de la dieta:</p>
+<p> </p>
+<p><span class="math display">\[ \begin{smallmatrix}
+&amp; \text{Vitamines (ui)} &amp; \text{ Hidrats de Carboni (ui)} &amp;
+\text{ Oligoelements (ui)} &amp; \text{ Proteines (ui)} &amp; \text{
+Preu (€/kg)}\\
+\text{Carn} &amp; 25 &amp; 20 &amp; 10 &amp; 150 &amp; 8\\
+\text{Peix} &amp; 200 &amp; 50 &amp; 10 &amp; 200 &amp; 10\\
+\text{Cereals} &amp; 300 &amp; 300 &amp; 10 &amp; 50 &amp; 2\\
+\text{Fruita} &amp; - &amp; 160 &amp; 50 &amp; 20 &amp; 1.5\\
+\text{Pa} &amp; - &amp; 120 &amp; 100 &amp; 20 &amp; 0.5\\
+\text{Mínim diari} &amp; \text{60ui/dia} &amp; \text{40ui/dia} &amp;
+\text{100ui/dia} &amp; \text{100ui/dia}
+\end{smallmatrix}\]</span></p>
+<p> </p>
+<p><strong>a) Formuleu la modelització matemàtica
+parametritzada</strong></p>
 <ol style="list-style-type: decimal">
 <li><p>Paràmetres:</p>
 <ul>
-<li><p>A, conjunt d’aliments</p></li>
-<li><p>N, conjunt de nutrients</p></li>
+<li><p>A, conjunt d’aliments: carn, peix, carn, cereals, fruita i
+pa</p></li>
+<li><p>N, conjunt de nutrients: v, hc, o, i p</p></li>
 <li><p><span class="math inline">\(c_i\)</span>, cost unitari de
-l’aliment <span class="math inline">\(i,\ i \in A\)</span></p></li>
+l’aliment <span class="math inline">\(i,\ i \in A\)</span> <em>(columna
+preu)</em></p></li>
 <li><p><span class="math inline">\(b_j\)</span>, quantitat mínima de
-nutrient j en la dieta <span class="math inline">\(j \in
-N\)</span></p></li>
+nutrient j en la dieta <span class="math inline">\(j \in N\)</span>
+<em>(vector del mínim diari)</em></p></li>
 <li><p><span class="math inline">\(a_{ij}\)</span>, quantitat de
 nutrient j present en una unitat d’aliment <span class="math inline">\(i,\ \forall i \in A \\ \quad \forall j \in
-N\)</span></p></li>
+N\)</span> <em>(matriu de dades)</em></p></li>
 </ul></li>
 <li><p>Variables de decisió:</p>
 <ul>
 <li><span class="math inline">\(x_i\)</span>, quantitat a produir de
-producte i, <span class="math inline">\(i \in A\)</span> (<span class="math inline">\(x_i \geq 0, \forall i \in A\)</span>)</li>
+producte i, <span class="math inline">\(i \in A\)</span> (<span class="math inline">\(x_i \geq 0, \forall i \in A\)</span>) <em>(la
+incògnita)</em></li>
 </ul></li>
 <li><p>Funció objectiu: minimitzar el cost</p></li>
 <li><p>Restriccions: quantitat mínima ingerida de cada nutrient (1
@@ -1792,27 +1895,154 @@ el sumatori el cost total}\]</span></p>
 N  \\
   x_i \geq 0, \forall i \in P
 \end{aligned} \right.\]</span></p>
+<p><em>Nota</em>: el <code>presolver=0</code>, dóna un valor inicial per
+començar a iterar. En aquest cas no hi ha diferència.</p>
+<pre class="sas"><code>proc optmodel presolver=0;
+
+*Paràmetres;
+set&lt;string&gt; ALIMENTS={&#39;carn&#39;,&#39;peix&#39;,&#39;cereals&#39;,&#39;fruita&#39;,&#39;pa&#39;};
+set&lt;string&gt; NUTRIENTS={&#39;v&#39;,&#39;hc&#39;,&#39;o&#39;,&#39;p&#39;};
+number cost{ALIMENTS} = [8 10 2 15 0.5];
+number q_min{NUTRIENTS} = [60 40 100 100];
+number q_nutr{ALIMENTS,NUTRIENTS} = [25 20 10 150
+                                     200 50 10 200
+                                     300 300 10 50
+                                     0 160 50 20
+                                     0 120 100 20];
+
+*Variables de decisió;
+var x{ALIMENTS}&gt;=0;
+
+*Funció objectiu;
+min cost_total=sum{i in ALIMENTS} cost[i]*x[i];
+
+*Restriccions;
+con min_quant{j in NUTRIENTS}:
+  sum{i in ALIMENTS} q_nutr[i,j]*x[i]&gt;=q_min[j];
+
+*Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
+expand;
+
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+
+*Per obtenir la solució de les x;
+print x.sol;
+
+*Per obtenir el valor òptim;
+print cost_total;</code></pre>
+<pre><code>                          The OPTMODEL Procedure
+
+Var x[carn] &gt;= 0
+Var x[peix] &gt;= 0
+Var x[cereals] &gt;= 0
+Var x[fruita] &gt;= 0
+Var x[pa] &gt;= 0
+Minimize cost_total=8*x[carn] + 10*x[peix] + 2*x[cereals] + 15*x[fruita] +
+0.5*x[pa]
+Restricción min_quant[v]: 25*x[carn] + 200*x[peix] + 300*x[cereals] &gt;= 60
+Restricción min_quant[hc]: 20*x[carn] + 50*x[peix] + 300*x[cereals] + 160*
+x[fruita] + 120*x[pa] &gt;= 40
+Restricción min_quant[o]: 10*x[carn] + 10*x[peix] + 10*x[cereals] + 50*
+x[fruita] + 100*x[pa] &gt;= 100
+Restricción min_quant[p]: 150*x[carn] + 200*x[peix] + 50*x[cereals] + 20*
+x[fruita] + 20*x[pa] &gt;= 100
+ 
+                                                                           
+ 
+                          The OPTMODEL Procedure
+
+                           Resumen del problema
+
+                Objective Sense                Minimization
+                Objective Function               cost_total
+                Objective Type                       Lineal
+                                                           
+                Number of Variables                       5
+                Bounded Above                             0
+                Bounded Below                             5
+                Bounded Below and Above                   0
+                Free                                      0
+                Fixed                                     0
+                                                           
+                Number of Constraints                     4
+                Linear LE (&lt;=)                            0
+                Linear EQ (=)                             0
+                Linear GE (&gt;=)                            4
+                Linear Range                              0
+                                                           
+                Coeficientes de restricción              18
+
+                        Información de rendimiento
+
+                    Execution Mode       Single-Machine
+                    Number of Threads    1             
+ 
+                                                                           
+ 
+                          The OPTMODEL Procedure
+
+                          Resumen de la solución
+
+                   Solver                            LP
+                   Algorithm               Dual Simplex
+                   Objective Function        cost_total
+                   Solution Status              Optimal
+                   Objective Value                 2.65
+                                                       
+                   Primal Infeasibility               0
+                   Dual Infeasibility                 0
+                   Bound Infeasibility                0
+                                                       
+                   Iterations                         5
+                   Presolve Time                   0.00
+                   Solution Time                   0.00
+
+                             [1]        x.SOL
+
+                             carn         0.0
+                             cereals      0.2
+                             fruita       0.0
+                             pa           4.5
+                             peix         0.0
+
+                                   cost_
+                                   total
+
+                                    2.65</code></pre>
 </div>
-<div id="problema-de-mescla" class="section level2">
-<h2>3. Problema de mescla</h2>
+<div id="exercici-3-problema-de-mescla" class="section level2">
+<h2>Exercici 3: Problema de mescla</h2>
+<p>Considereu el següent problema de mescla:</p>
+<p> </p>
+<p><span class="math display">\[ \begin{smallmatrix}
+&amp; \text{Disolvent 1} &amp; \text{Disolvent 2} &amp; \text{Disolvent
+3} &amp; \text{Disolvent 4} &amp; \text{  Contingut mescla (ml/l)}\\
+\text{Clor (ml/l)} &amp; 180 &amp; 120 &amp; 90 &amp; 60 &amp; \geq 90\\
+\text{Amoníac (ml/l)} &amp; 3 &amp; 2 &amp; 6 &amp; 5 &amp; \leq 4\\
+\text{Cost (€/l)} &amp; 16 &amp; 12 &amp; 10 &amp; 11
+\end{smallmatrix}\]</span></p>
+<p> </p>
+<p><strong>a) Formuleu la modelització matemàtica
+parametritzada</strong></p>
 <ol style="list-style-type: decimal">
 <li><p>Paràmetres:</p>
 <ul>
-<li><p>D, conjunt de dissolvents</p></li>
-<li><p>A, conjunt de components de quantitat mínima
-(<em>bones</em>)</p></li>
-<li><p>B, conjunt de components de quantitat màxima
-(<em>dolentes</em>)</p></li>
+<li><p>D, conjunt de dissolvents: 1,2,3,4</p></li>
+<li><p>A, conjunt de components de quantitat mínima: cl</p></li>
+<li><p>B, conjunt de components de quantitat màxima: am</p></li>
 <li><p>C, A <span class="math inline">\(\cup\)</span> B, conjunt total
-de components</p></li>
+de components: cl, am</p></li>
 <li><p><span class="math inline">\(c_i\)</span>, cost unitari de
-dissolvent <span class="math inline">\(i,\ i \in D\)</span></p></li>
+dissolvent <span class="math inline">\(i,\ i \in D\)</span> <em>(vector
+cost)</em></p></li>
 <li><p><span class="math inline">\(b_j\)</span>, quantitat mínima o
 màxima de component j en la mescla <span class="math inline">\(\ j \in
-C\)</span></p></li>
+C\)</span> <em>(columna contingut)</em></p></li>
 <li><p><span class="math inline">\(a_{ij}\)</span>, quantitat de
 component j en una unitat de dissolvent <span class="math inline">\(i,\
-\forall i \in D \\ \quad \forall j \in C\)</span></p></li>
+\forall i \in D \\ \quad \forall j \in C\)</span> <em>(matriu de
+dades)</em></p></li>
 </ul></li>
 <li><p>Variables de decisió:</p>
 <ul>
@@ -1843,68 +2073,116 @@ B  \quad \text{(2)}\\
   \underset{i \in D}{\sum} x_i=1 \\
   x_i \geq 0 \quad , \quad  x_i \leq 1 \quad , \quad \forall i \in D
 \end{aligned} \right.\]</span></p>
-<p>Tenim més d’un conjunt de restriccions, ja que n’hi ha algunes que hi
-ha una quantitat mínima, i d’altres que no sobrepassem una quantitat
-màxim.</p>
-<p><em>Nota sobre les restriccions: la restricció de menor o igual a 1,
-és redundant ja que amb el major o igual a 0 i el sumatori de totes = 1,
-se sobreeentén que no pot haver ninguna per sobre de 1. (la podem anotar
-o no)</em></p>
-</div>
-<div id="problema-del-transport" class="section level2">
-<h2>4. Problema del transport</h2>
-<p><strong>Exemple:</strong> Tenim un conjunt de refineries i diferents
-mercats on podem vendre el nostre producte. Volem enviar a vendre perquè
-el transport surti més barat. Cada mercat té una demanda que volem
-assolir, i cada refineria té una capacitat màxima de producció.</p>
-<ol style="list-style-type: decimal">
-<li><p>Paràmetres:</p>
-<ul>
-<li><p>R, conjunt de refineries</p></li>
-<li><p>M, conjunt de mercats</p></li>
-<li><p><span class="math inline">\(p_i\)</span>, producció màxima a la
-refineria <span class="math inline">\(i,\ i \in R\)</span></p></li>
-<li><p><span class="math inline">\(d_j\)</span>, demanda al mercat <span class="math inline">\(\ j \in M\)</span></p></li>
-<li><p>Suposem que tenim més oferta que demanda. Si no: infactible:
-<span class="math inline">\(\underset{i \in R}{\sum} p_i \geq
-\underset{j \in M}{\sum} d_j\)</span></p></li>
-<li><p><span class="math inline">\(c_{ij}\)</span>, cost del transport
-per unitat de producte de la refineria i al mercat j <span class="math inline">\(i,\ \forall i \in R \\ \quad \forall j \in
-M\)</span></p></li>
-</ul></li>
-<li><p>Variables de decisió:</p>
-<ul>
-<li><span class="math inline">\(x_{ij}\)</span>, quantitat de producte
-transportrada de la refineria i al mercat j</li>
-</ul></li>
-<li><p>Funció objectiu: minimitzar el cost unitari (habitualment en
-cost/litre) de la mescla</p></li>
-<li><p>Restriccions:</p>
-<ul>
-<li><p>El sumatori de tot el que enviem des d’una refineria a tots els
-mercats, ha de ser menor a la producció que pot fer la refineria
-(1)</p></li>
-<li><p>El producte que li arriba al mercat, procedent de totes les
-refineries, ha de ser major a la demanda (2)</p></li>
-</ul></li>
-<li><p><strong>Model:</strong></p></li>
-</ol>
-<p><span class="math display">\[ \underset{x}{min} \underset{i \in
-R}{\sum}\underset{j \in M}{\sum} c_{ij}x_{ij} \qquad \text{on}\
-c_{ij}x_{ij}\ \text{és el cost t. de}\ R_i \text{al} M_j \text{, i el
-sumatori és el cost total }\]</span></p>
-<p><span class="math display">\[ s.a: \left\{ \begin{aligned}
-  \underset{j \in M}{\sum} x_{ij} \leq p_i \quad, \quad \forall i \in R
-\quad \text{(1)} \\
-  \underset{i \in R}{\sum} x_{ij} \geq d_j \quad, \quad \forall j \in M
-\quad \text{(2)} \\
-  x_{ij} \geq 0 \quad , \quad \forall i \in R \quad , \quad \forall j
-\in M
-\end{aligned} \right.\]</span></p>
-<p>Tenim més d’un conjunt de restriccions, ja que n’hi ha algunes que hi
-ha una quantitat mínima, i d’altres que no sobrepassem una quantitat
-màxim.</p>
-</div>
+<p><strong>Falta revisar codi</strong></p>
+<pre class="sas"><code>proc optmodel presolver=0;
+
+*Paràmetres;
+set&lt;string&gt; disolvents={&#39;1&#39;,&#39;2&#39;,&#39;3&#39;,&#39;4&#39;};
+set&lt;string&gt; components={&#39;cl&#39;,&#39;am&#39;};
+set&lt;string&gt; comp_min={&#39;cl&#39;};
+set&lt;string&gt; comp_max={&#39;am&#39;};
+number cost{disolvents} = [16 12 10 11];
+number quant{components} = [90 4];
+number q_comp{disolvents,components} = [180 3 120 2 90 6 60 5];
+
+*Variables de decisió;
+var x{disolvents}&gt;=0;
+
+*Funció objectiu;
+min cost_total=sum{i in disolvents} cost[i]*x[i];
+
+*Restriccions;
+con min_quant{j in comp_min}:
+  sum{i in disolvents} q_comp[i,j]*x[i]&gt;=quant[j];
+con max_quant{j in comp_max}:
+  sum{i in disolvents} q_comp[i,j]*x[i]&lt;=quant[j];
+con sum{i in disolvents} x[i]=1;
+
+*Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
+expand;
+
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+
+*Per obtenir la solució de les x;
+print x.sol;
+
+*Per obtenir el valor òptim;
+print cost_total;</code></pre>
+<pre><code>                          The OPTMODEL Procedure
+
+Var x[&#39;1&#39;] &gt;= 0
+Var x[&#39;2&#39;] &gt;= 0
+Var x[&#39;3&#39;] &gt;= 0
+Var x[&#39;4&#39;] &gt;= 0
+Minimize cost_total=16*x[&#39;1&#39;] + 12*x[&#39;2&#39;] + 10*x[&#39;3&#39;] + 11*x[&#39;4&#39;]
+Restricción min_quant[cl]: 180*x[&#39;1&#39;] + 120*x[&#39;2&#39;] + 90*x[&#39;3&#39;] + 60*x[&#39;4&#39;]
+&gt;= 90
+Restricción max_quant[am]: 3*x[&#39;1&#39;] + 2*x[&#39;2&#39;] + 6*x[&#39;3&#39;] + 5*x[&#39;4&#39;] &lt;= 4
+Restricción _ACON_[1]: x[&#39;1&#39;] + x[&#39;2&#39;] + x[&#39;3&#39;] + x[&#39;4&#39;] = 1
+ 
+                                                                           
+ 
+                          The OPTMODEL Procedure
+
+                           Resumen del problema
+
+                Objective Sense                Minimization
+                Objective Function               cost_total
+                Objective Type                       Lineal
+                                                           
+                Number of Variables                       4
+                Bounded Above                             0
+                Bounded Below                             4
+                Bounded Below and Above                   0
+                Free                                      0
+                Fixed                                     0
+                                                           
+                Number of Constraints                     3
+                Linear LE (&lt;=)                            1
+                Linear EQ (=)                             1
+                Linear GE (&gt;=)                            1
+                Linear Range                              0
+                                                           
+                Coeficientes de restricción              12
+
+                        Información de rendimiento
+
+                    Execution Mode       Single-Machine
+                    Number of Threads    1             
+ 
+                                                                           
+ 
+                          The OPTMODEL Procedure
+
+                          Resumen de la solución
+
+                   Solver                            LP
+                   Algorithm               Dual Simplex
+                   Objective Function        cost_total
+                   Solution Status              Optimal
+                   Objective Value                   11
+                                                       
+                   Primal Infeasibility               0
+                   Dual Infeasibility                 0
+                   Bound Infeasibility                0
+                                                       
+                   Iterations                         5
+                   Presolve Time                   0.00
+                   Solution Time                   0.00
+
+                               [1]    x.SOL
+
+                               1        0.0
+                               2        0.5
+                               3        0.5
+                               4        0.0
+
+                                   cost_
+                                   total
+
+                                      11</code></pre>
+<p>Exercici 5</p>
 </div>
 
 
