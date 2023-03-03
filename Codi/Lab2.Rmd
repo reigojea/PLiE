@@ -270,19 +270,17 @@ set<string> comp_min={'cl'};
 set<string> comp_max={'am'};
 number cost{disolvents} = [16 12 10 11];
 number quant{components} = [90 4];
-number q_comp{disolvents,components} = [180 3 120 2 90 6 60 5];
-
+number q_comp{components,disolvents} = [180 120 90 60
+                                        3 2 6 5];
 *Variables de decisió;
 var x{disolvents}>=0;
-
 *Funció objectiu;
 min cost_total=sum{i in disolvents} cost[i]*x[i];
-
 *Restriccions;
 con min_quant{j in comp_min}:
-  sum{i in disolvents} q_comp[i,j]*x[i]>=quant[j];
+  sum{i in disolvents} q_comp[j,i]*x[i]>=quant[j];
 con max_quant{j in comp_max}:
-  sum{i in disolvents} q_comp[i,j]*x[i]<=quant[j];
+  sum{i in disolvents} q_comp[j,i]*x[i]<=quant[j];
 con sum{i in disolvents} x[i]=1;
 
 *Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
