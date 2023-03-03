@@ -1466,20 +1466,13 @@ code span.wa { color: #8f5902; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    var j = 0;
-    while (j < rules.length) {
+    for (var j = 0; j < rules.length; j++) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
-        j++;
-        continue;
-      }
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') {
-        j++;
-        continue;
-      }
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -1537,8 +1530,8 @@ pre code {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -1546,9 +1539,16 @@ pre code {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "\e258";
-  font-family: 'Glyphicons Halflings';
+  content: "";
   border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -1743,7 +1743,6 @@ M \\
 \end{aligned} \right.\]</span></p>
 <p><strong>b) Implementeu i resoleu amb OPTMODEL</strong></p>
 <pre class="sas"><code>proc optmodel;
-
 *Paràmetres;
 set&lt;string&gt; P={&#39;A&#39;,&#39;B&#39;};
 set&lt;string&gt; R={&#39;ma&#39;,&#39;fusta&#39;,&#39;plastic&#39;};
@@ -1751,26 +1750,19 @@ number c{P} = [300 200];
 number b{R} = [150 300 100];
 number a{P,R} = [1 3 2
                  2 2 0];
-
 *Variables de decisió;
 var x{P}&gt;=0;
-
 *Funció objectiu;
 max ben_total=sum{i in P} c[i]*x[i];
-
 *Restriccions;
 con limit_recurs{j in R}:
   sum{i in P} a[i,j]*x[i]&lt;=b[j];
-
 *Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
 expand;
-
 *Per a obtenir la funció objectiu i un resum del problema;
 solve;
-
 *Per obtenir la solució de les x;
 print x.sol;
-
 *Per obtenir el valor òptim;
 print ben_total;</code></pre>
 <pre><code>                          The OPTMODEL Procedure
@@ -1840,6 +1832,8 @@ Restricción limit_recurs[plastic]: 2*x[A] &lt;= 100
                                  ben_total
 
                                      25000</code></pre>
+<p>S’obté el màxim benefici utilitzant 50kg del producte A i 50kg del
+producte B. Aquest benefici és de 25000€.</p>
 </div>
 <div id="exercici-2-problema-de-la-dieta" class="section level2">
 <h2>Exercici 2: Problema de la dieta</h2>
@@ -1898,7 +1892,6 @@ N  \\
 <p><em>Nota</em>: el <code>presolver=0</code>, dóna un valor inicial per
 començar a iterar. En aquest cas no hi ha diferència.</p>
 <pre class="sas"><code>proc optmodel presolver=0;
-
 *Paràmetres;
 set&lt;string&gt; ALIMENTS={&#39;carn&#39;,&#39;peix&#39;,&#39;cereals&#39;,&#39;fruita&#39;,&#39;pa&#39;};
 set&lt;string&gt; NUTRIENTS={&#39;v&#39;,&#39;hc&#39;,&#39;o&#39;,&#39;p&#39;};
@@ -1909,26 +1902,19 @@ number q_nutr{ALIMENTS,NUTRIENTS} = [25 20 10 150
                                      300 300 10 50
                                      0 160 50 20
                                      0 120 100 20];
-
 *Variables de decisió;
 var x{ALIMENTS}&gt;=0;
-
 *Funció objectiu;
 min cost_total=sum{i in ALIMENTS} cost[i]*x[i];
-
 *Restriccions;
 con min_quant{j in NUTRIENTS}:
   sum{i in ALIMENTS} q_nutr[i,j]*x[i]&gt;=q_min[j];
-
 *Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
 expand;
-
 *Per a obtenir la funció objectiu i un resum del problema;
 solve;
-
 *Per obtenir la solució de les x;
 print x.sol;
-
 *Per obtenir el valor òptim;
 print cost_total;</code></pre>
 <pre><code>                          The OPTMODEL Procedure
@@ -2010,6 +1996,9 @@ x[fruita] + 20*x[pa] &gt;= 100
                                    total
 
                                     2.65</code></pre>
+<p>Per a obtenir els nutrients necessàris amb el mínim cost possible,
+s’han de consumir 0.5kg de cereals i 4.5kg de pa. Aquesta dieta ens
+costaria 2.65€.</p>
 </div>
 <div id="exercici-3-problema-de-mescla" class="section level2">
 <h2>Exercici 3: Problema de mescla</h2>
@@ -2075,7 +2064,6 @@ B  \quad \text{(2)}\\
 \end{aligned} \right.\]</span></p>
 <p><strong>Falta revisar codi</strong></p>
 <pre class="sas"><code>proc optmodel presolver=0;
-
 *Paràmetres;
 set&lt;string&gt; disolvents={&#39;1&#39;,&#39;2&#39;,&#39;3&#39;,&#39;4&#39;};
 set&lt;string&gt; components={&#39;cl&#39;,&#39;am&#39;};
@@ -2083,30 +2071,24 @@ set&lt;string&gt; comp_min={&#39;cl&#39;};
 set&lt;string&gt; comp_max={&#39;am&#39;};
 number cost{disolvents} = [16 12 10 11];
 number quant{components} = [90 4];
-number q_comp{disolvents,components} = [180 3 120 2 90 6 60 5];
-
+number q_comp{components,disolvents} = [180 120 90 60
+                                        3 2 6 5];
 *Variables de decisió;
 var x{disolvents}&gt;=0;
-
 *Funció objectiu;
 min cost_total=sum{i in disolvents} cost[i]*x[i];
-
 *Restriccions;
 con min_quant{j in comp_min}:
-  sum{i in disolvents} q_comp[i,j]*x[i]&gt;=quant[j];
+  sum{i in disolvents} q_comp[j,i]*x[i]&gt;=quant[j];
 con max_quant{j in comp_max}:
-  sum{i in disolvents} q_comp[i,j]*x[i]&lt;=quant[j];
+  sum{i in disolvents} q_comp[j,i]*x[i]&lt;=quant[j];
 con sum{i in disolvents} x[i]=1;
-
 *Per a que ens retorni les fórmules de la variable de decisió, f.obj i restriccions;
 expand;
-
 *Per a obtenir la funció objectiu i un resum del problema;
 solve;
-
 *Per obtenir la solució de les x;
 print x.sol;
-
 *Per obtenir el valor òptim;
 print cost_total;</code></pre>
 <pre><code>                          The OPTMODEL Procedure
@@ -2182,7 +2164,6 @@ Restricción _ACON_[1]: x[&#39;1&#39;] + x[&#39;2&#39;] + x[&#39;3&#39;] + x[&#3
                                    total
 
                                       11</code></pre>
-<p>Exercici 5</p>
 </div>
 
 
