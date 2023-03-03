@@ -1,0 +1,226 @@
+---
+title: "PLiE Laboratori (LAB 3)"
+author: "REIG OJEA PONCE"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: hide
+date: '03/mar/2023'
+---
+
+```{r, warning=F, message=F}
+# install.packages("SASmarkdown")
+library(SASmarkdown)
+saspath <- "C:/Program Files/SASHome/SASFoundation/9.4/sas.exe" #UB
+sasopts <- "-nosplash -linesize 75"
+knitr::opts_chunk$set(engine="sashtml", engine.path=saspath, 
+        engine.opts=sasopts, comment=NA)
+```
+
+
+## Exercici 8: Hospital del Mar
+
+L'Hospital del Mar té un problema amb el laboratori d'anàlisi de mostres. El laboratori té disponibles tres màquines que poden analitzar diferents mostres de fluids. Darrerament la demanda d'anàlisis de sang s'ha incrementat de tal forma que el director del laboratori té problemes per tenir els resultats a temps i fer front alhora a les analítiques de les restes de fluids. El laboratori treballa amb 5 tipus diferents de mostres fluids. Cada màquina pot ser usada per a analitzar qualsevol tipus de mostra, però el temps (minuts) que triga cadascuna depèn del tipus de mostra, segons s'indica a la següent taula:
+
+&nbsp;
+
+$$ \begin{smallmatrix}
+ & \text{Temps de processat (minuts/ml)} & \text{ Maq.A} & \text{ Maq.B} & \text{ Maq.B} & \text{  Vol(ml)}\\
+\text{Mostra 1} & 3 & 5 & 2 & 80\\
+\text{Mostra 2} & 4 & 3 & 5 & 75\\
+\text{Mostra 3} & 4 & 5 & 3 & 80\\
+\text{Mostra 4} & 5 & 4 & 3 & 12\\
+\text{Mostra 5} & 3 & 5 & 4 & 60\\
+\end{smallmatrix}$$
+Cada màquina es pot usar un màxim de 8h al dia. Les mostres recollides un dia donat arriben al laboratori i esperen durant la nit a ser processades a l'endemà. Al començament de cada dia, el director del laboratori ha de determinar com repartir les mostres entre les diferents màquines. La quantitat de mostres a analitzar aquest matí s'indica a la darrera columna de la taula anterior.
+
+&nbsp;
+
+### a) Formuleu la modelització matemàtica parametritzada
+
+1. Paràmetres:
+
+    - I, conjunt de mostres: 1,2,3,4,5
+   
+    - J, conjunt de màquines: A, B, C
+    
+    - $v_i$, volum a analitzar de la mostra $i,\ \forall i \in I$ *(columna volum)*
+    
+    - $t_{ij}$, temps que triga la màquina $j$ a analitzar 1ml de mostra $i,\ \forall i \in I \\ \quad \forall j \in J$        *(matriu de dades)*
+    
+    - $t^{max}$, temps d'ús de qualsevol màquina [n]
+
+2. Variables de decisió:
+
+    - $x_{ij}$, volum de mostra $i$ que s'analitza amb la màquina $j$, on $i \in I$, $j \in J$ *(la incògnita)*
+    
+3. Funció objectiu: minimitzar el temps a analitzar totes les mostres a totes les màquines.
+
+4. Restriccions:  no podem utilitzar una màquina més de 8h al dia.
+    
+5. **Model:**
+
+$$ \underset{x}{min} \underset{j \in J}{\sum} \underset{i \in I}{\sum} t_{ij}x_{ij}$$
+
+$$ s.a: \left\{ \begin{aligned} 
+  \underset{i \in I}{\sum} t_{ij}x_{ij} \leq t_{(j)}^{max} \quad, \quad \forall j \in J \\
+  \underset{j \in J}{\sum} x_{ij} = v_i \quad, \quad \forall i \in I \\
+  x_{ij} \geq 0, \quad \forall i \in I \qquad \forall j \in J
+\end{aligned} \right.$$
+
+*Nota:*
+
+- $t_{ij}x_{ij}$ és el temps que es triga a analitzar la mostra i en la màquina j
+    
+- $\underset{i \in I}{\sum} t_{ij}x_{ij}$ és el vector del temps que triga per màquina
+    
+- $\underset{j \in J}{\sum} t_{ij}x_{ij}$ és el vector del temps que triga per mostra
+
+```{sas}
+proc optmodel;
+
+*PARÀMETRES;
+set<number> mostres={1,2,3,4,5};
+set<string> maquines={'A','B','C'};
+number volum{mostres} = [80 75 80 12 60];
+number t_max = 480;
+*Nota en minuts per tenir sempre les mateixes unitats (IMPORTANT);
+*number t_max{maquines}=[480 480 480];
+number temps{mostres,maquines} = [3 5 2
+                                  4 3 5
+                                  4 5 3
+                                  5 4 3
+                                  3 5 4];
+
+*VARIABLES DE DECISIÓ;
+var x{mostres,maquines}>=0;
+
+*FUNCIÓ OBJECTIU;
+min temps_total=sum{i in mostres, j in maquines} temps[i,j]*x[i,j];
+
+*RESTRICCIONS;
+con cons_temps{j in maquines}:
+  sum{i in mostres} temps[i,j]*x[i,j] <= t_max;
+
+con cons_volum{i in mostres}:
+  sum{j in maquines} x[i,j]=volum[i];
+
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+*Per obtenir la solució de les x;
+print x.sol;
+*Per obtenir el valor òptim;
+print temps_total;
+```
+
+### b) Considereu ara que es vol obtenir la distribució òptima de mostres tenint en compte les següents limitacions:
+
+- **No es vol que cap mostra ocupi més del 50% del temps total de funcionament d’una màquina.**
+
+Definim un paràmetre nou: $\alpha$ com a proporció màxima del temps total d'una màquina que es pot destinar a analitzar una única mostra. Afegim una nova restricció al model (vermell). Definim el subíndex k per què no entri en conflicte amb la i (és una altra variable que també es mou per files però no alhora).
+
+$$ \underset{x}{min} \underset{j \in J}{\sum} \underset{i \in I}{\sum} t_{ij}x_{ij}$$
+
+$$ s.a: \left\{ \begin{aligned} 
+  \underset{i \in I}{\sum} t_{ij}x_{ij} \leq t_{(j)}^{max} \quad, \quad \forall j \in J \\
+  \underset{j \in J}{\sum} x_{ij} = v_i \quad, \quad \forall i \in I \\
+  x_{ij} \geq 0, \quad \forall i \in I \qquad \forall j \in J \\
+  \color{red}{t_{ij}x_{ij} \leq \alpha \underset{k \in I}{\sum} t_{kj}x_{kj} \quad, \quad \forall i \in I, \quad \forall j \in J}
+\end{aligned} \right.$$
+
+```{sas}
+proc optmodel;
+
+*PARÀMETRES;
+set<number> mostres={1,2,3,4,5};
+set<string> maquines={'A','B','C'};
+number volum{mostres} = [80 75 80 12 60];
+number t_max = 480;
+*Nota en minuts per tenir sempre les mateixes unitats (IMPORTANT);
+*number t_max{maquines}=[480 480 480];
+number temps{mostres,maquines} = [3 5 2
+                                  4 3 5
+                                  4 5 3
+                                  5 4 3
+                                  3 5 4];
+number alpha=0.5;
+
+*VARIABLES DE DECISIÓ;
+var x{mostres,maquines}>=0;
+
+*FUNCIÓ OBJECTIU;
+min temps_total=sum{i in mostres, j in maquines} temps[i,j]*x[i,j];
+
+*RESTRICCIONS;
+con cons_temps{j in maquines}:
+  sum{i in mostres} temps[i,j]*x[i,j] <= t_max;
+
+con cons_volum{i in mostres}:
+  sum{j in maquines} x[i,j]=volum[i];
+
+con cons_b1{i in mostres, j in maquines}:
+  temps[i,j]*x[i,j]<=alpha*sum{k in mostres} temps[k,j]*x[k,j];
+
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+*Per obtenir la solució de les x;
+print x.sol;
+*Per obtenir el valor òptim;
+print temps_total;
+```
+
+- **No es vol que cap mostra ocupi més del 50% del temps total de funcionament d’una màquina.**
+
+Definim un paràmetre nou: $\beta$ com a proporció màxima del volum total que pot analitzar una única màquina. Afegim una nova restricció al model (vermell).
+
+$$ \underset{x}{min} \underset{j \in J}{\sum} \underset{i \in I}{\sum} t_{ij}x_{ij}$$
+
+$$ s.a: \left\{ \begin{aligned} 
+  \underset{i \in I}{\sum} t_{ij}x_{ij} \leq t_{(j)}^{max} \quad, \quad \forall j \in J \\
+  \underset{j \in J}{\sum} x_{ij} = v_i \quad, \quad \forall i \in I \\
+  x_{ij} \geq 0, \quad \forall i \in I \qquad \forall j \in J \\
+  \color{red}{\underset{i \in I}{\sum}x_{ij} \leq \beta\underset{i \in I}{\sum} v_i , \quad \forall i \in I }
+\end{aligned} \right.$$
+```{sas}
+proc optmodel;
+
+*PARÀMETRES;
+set<number> mostres={1,2,3,4,5};
+set<string> maquines={'A','B','C'};
+number volum{mostres} = [80 75 80 12 60];
+number t_max = 480;
+*Nota en minuts per tenir sempre les mateixes unitats (IMPORTANT);
+*number t_max{maquines}=[480 480 480];
+number temps{mostres,maquines} = [3 5 2
+                                  4 3 5
+                                  4 5 3
+                                  5 4 3
+                                  3 5 4];
+number beta=0.4;
+
+*VARIABLES DE DECISIÓ;
+var x{mostres,maquines}>=0;
+
+*FUNCIÓ OBJECTIU;
+min temps_total=sum{i in mostres, j in maquines} temps[i,j]*x[i,j];
+
+*RESTRICCIONS;
+con cons_temps{j in maquines}:
+  sum{i in mostres} temps[i,j]*x[i,j] <= t_max;
+
+con cons_volum{i in mostres}:
+  sum{j in maquines} x[i,j]=volum[i];
+
+con cons_b2{j in maquines}:
+  sum {i in mostres} x[i,j]<=beta*sum{i in mostres} volum[i];
+
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+*Per obtenir la solució de les x;
+print x.sol;
+*Per obtenir el valor òptim;
+print temps_total;
+```
