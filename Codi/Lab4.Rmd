@@ -1,0 +1,205 @@
+---
+title: "PLiE Laboratori (LAB 4)"
+author: "REIG OJEA PONCE"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
+    code_folding: hide
+date: '10/mar/2023'
+---
+
+```{r, warning=F, message=F}
+# install.packages("SASmarkdown")
+library(SASmarkdown)
+# saspath <- "C:/Program Files/SASHome/x86/SASFoundation/9.4/sas.exe" #UPC
+saspath <- "C:/Program Files/SASHome/SASFoundation/9.4/sas.exe" #UB
+sasopts <- "-nosplash -linesize 75"
+knitr::opts_chunk$set(engine="sashtml", engine.path=saspath, 
+        engine.opts=sasopts, comment=NA)
+```
+
+
+## Exercici 6: Coalco
+
+L’empresa minera Coalco produeix carbó a dues mines per a dos clients. La següent taula mostra, per a cada mina, les següents dades: cost per tona transportada entre cada mina i cada client; cost per tona de carbó produida; producció màxima i contingut en cendra i sulfur per a cada tona de carbó produida. També s'indica la demanda de cada client.
+
+&nbsp;
+
+$$ \begin{smallmatrix}
+ & \text{Cost transport (€/Tm)} & \text{ Client 1} & \text{ Client 2}& \text{ Cost producció (€/Tm)} & \text{ Cendra (Tm/Tm carbó)} & \text{ Sulfur (Tm/Tm carbó)}\\
+\text{Mina 1} & 4 & 6 & 50 & 120 & 0.1 & 0.04\\
+\text{Mina 2} & 9 & 6 & 55 & 100 & 0.05 & 0.09\\
+\text{Demanda (Tm)} & 90 & 110 & & \text{Contingut màxim} & \text{8%} & \text{7%}
+\end{smallmatrix}$$
+
+&nbsp;
+
+**a) Formuleu la modelització matemàtica parametritzada**
+
+1. Paràmetres:
+
+    - I, conjunt de mines: 1, 2
+    
+    - J, conjunt de clients: 1,2
+    
+    - k, conjunt de components: cendra, sulfur
+    
+    - $c_i$, cost de producció per Tm de la mina $i,\ \forall i \in I$
+    
+    - $b_i$, capacitat de producció de la mina $i,\ \forall i \in I$
+    
+    - $d_j$, demanda del client $j,\ j \in J$
+    
+    - $t_{ij}$, cost per a transportar 1Tm de la mina $i$ fins al client $j,\ \forall i \in I \\ \quad \forall j \in J$  
+    
+    - $\alpha_{ik}$, proporció de component k present en el carbó de la mina $i$,\ \forall i \in I \\ \quad \forall k \in K$
+    
+    - $\alpha_{ik}^{max}$, proporció màxima de component k que pot presentar el carbó d'un client, $k \in K$
+
+2. Variables de decisió:
+
+    - $x_{ij}$, quantitat de carbó produït a la mina $i$ i enviat al client $j$ ($x_{ij} \geq 0)
+    
+3. Funció objectiu: minimitzar el cost
+
+4. Restriccions:  
+    
+5. **Model:**
+
+$$ \underset{x}{max} \underset{i \in I}{\sum}\underset{j \in J}{\sum} c_ix_{ij} + \underset{i \in I}{\sum}\underset{j \in J}{\sum} t_{ij}x_{ij} = \underset{i \in I}{\sum}\underset{j \in J}{\sum} (c_i + t_{ij})x_{ij}$$
+
+$$ s.a: \left\{ \begin{aligned} 
+  \underset{j \in J}{\sum} x_{ij} \leq b_j \quad, \quad \forall i \in I \qquad (1)\\
+  \underset{i \in I}{\sum} x_{j} \geq d_j \quad, \quad \forall j \in J \qquad (2)\\
+  \frac {\underset{i \in I}{\sum} \alpha_{ik}x_{ij}}{\underset{i \in I}{\sum}x_{ij}} \leq \alpha_k^{max} 
+  \quad \Leftrightarrow \quad \underset{i \in I}{\sum} (\alpha_{ik}-\alpha_k^{max})x_{ij} \leq 0 \qquad (3)
+\end{aligned} \right.$$
+
+
+**b) Implementeu i resoleu amb OPTMODEL**
+
+```{sas}
+proc optmodel;
+*Paràmetres;
+number nM = 2;
+number nC = 2;
+
+set<number> mines = 1..nM;
+set<number> clients = 1..nC;
+set<string> components={'cendra','sulfur'};
+
+number demanda{clients}=[90 110];
+number produccio{mines}=[120 100];
+number cost_prod{mines}=[50 55];
+number cost_trans{mines, clients}=[4 6
+                                   9 6];
+
+number alpha{mines,components} = [0.10 0.04
+                                  0.05 0.09];
+
+number alpha_max{components} = [0.08,0.07];
+
+*Variables de decisió;
+var x{mines, clients}>=0;
+
+*Funció objectiu;
+min cost_total = sum {i in mines,j in clients} (cost_prod[i]+cost_trans[i,j])*x[i,j];
+
+*Restriccions;
+
+*Restriccio demanda;
+con cons_dem{j in clients}:
+  sum {i in mines} x[i,j] >= demanda[j];
+
+*Restriccio produccio;
+con cons_prod{i in mines}:
+  sum {j in clients} x[i,j] <= produccio[i];
+
+*Restriccio contingut maxim;
+con cons_cont_max{j in clients, k in components}:
+  sum {i in mines} (alpha_max[k] - alpha[i,k])*x[i,j]>=0;
+
+*Model extens;
+expand;
+*Per a obtenir la funció objectiu i un resum del problema;
+solve;
+*Per obtenir la solució de les x;
+print x.sol;
+```
+
+
+
+## Exercici 7: CSL
+
+L'empresa de consultoria CSL ha d'encetar en els próxims 5 mesos un conjunt de projectes que
+necessitaran les següents quantitats d'hora de consultor qualificats per mes:
+
+&nbsp;
+
+$$ \begin{smallmatrix}
+ & \text{Gener} & \text{ Febrer} & \text{ Març} & \text{ Abril} & \text{ Maig}\\
+\text{Demanda (h)} & 3000 & 4000 & 7500 & 10000 & 15000\\
+\end{smallmatrix}$$
+
+&nbsp;
+
+**a) Formuleu la modelització matemàtica parametritzada**
+
+1. Paràmetres:
+
+    - M, conjunt de mesos: 1, 2, 3, 4, 5
+   
+    - $d_i$, demanda d'hores de treball de consultor qualificat al mes $i,\ i \in M$
+    
+    - $n_q$, # de consultors qualificats a l'inici
+    
+    - $h_q$, hores de feina d'un consultor qualificat
+    
+    - $c_q$, sou mensual d'un consultor qualificat
+    
+    - $\alpha$, fracció de permanència dels consultors qualificats (0.95)
+    
+    - $h_k^f$, hores de formacio que necessita un consultor en el seu mes de formació
+    
+    - $c^f$, sou mensual d'un consultor en formació
+
+2. Variables de decisió:   Volem saber a cada mes quants consultors contracto
+
+    - $x_i$, # consultors en formació al primer mes i, $i \in {0}\cup M \ (\geq 0)$
+    
+    - $y_i$, # consultors en formació al segon mes i, $i \in {0}\cup M \ (\geq 0)$ (variable auxiliar)
+    
+    - $z_i$, # de consultors qualificats al mes i, $i \in {0}\cup M \ (\geq 0)$
+    
+* Nota: s'ha d'afegir el 0 per poder saber l'estat inicial, és a dir, la info de quan els que estan ara al segon mes, estaven al 1r*.
+    
+3. Funció objectiu: minimitzar el cost associat als sous de cadascú
+
+4. Restriccions:
+
+    1. Les hores que la gent qualificada destina a la formació dels no qualificats. El que sobra del temps de formació (dels qualificats) ha de sser superior a la demanda d'hores de treball.
+    
+    2. Els treballadors en formació del 2n mes, són els mateixos que els del primer mes de l'anterior.
+    
+    3. Sobre la permanència. Sabem que poden marxar els treballadors ja qualificats (un 0.05), per tant també cal incloure els que acaben de finalitzar la seva formació ($y_{i-1}$).
+    
+    4. **Sempre s'han de definir les condicions inicials quan tenim una seqüència temporal**. A l'inici, no tenim cap treballador en formació (enunciat).
+
+5. **Model:**
+
+$$ \underset{x}{min} \underset{i \in M}{\sum} c^f(x_i+y_i)+c^qz_i$$
+
+$$ s.a: \left\{ \begin{aligned} 
+ \underset{i \in A}{\sum} h^qz_i-(h_1^fx_i+h_2^fy_i) \geq d_i \ , \ \forall i \in M  \qquad (1) \\
+  y_i = x_{i-1} \ , \forall i \in M   \qquad (2)\\
+  z_i \leq \alpha(z_{i-1}+y_{i-1}), \forall i \in M   \qquad (3)\\
+  z_0 = n_q \ , x_0=y_0=0 \qquad (4)\\
+  x_i,y_i,z_i \geq 0 \quad \forall i \in M \qquad (4)\\
+\end{aligned} \right.$$
+
+```{sas}
+
+```
